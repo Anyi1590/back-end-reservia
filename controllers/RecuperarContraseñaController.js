@@ -8,15 +8,19 @@ export const recuperar = async (req, res) => {
     try {
         const pool = getPool();
         const { email } = req.body;
+        const emailNormalizado = typeof email === "string" ? email.trim().toLowerCase() : "";
 
         // Validar que haya email
-        if (!email) {
+        if (!emailNormalizado) {
             return res.status(400).json({ mensaje: "Debe ingresar un email." });
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNormalizado)) {
+            return res.status(400).json({ mensaje: "El correo electrónico debe tener un formato válido." });
         }
 
                 const [rows] = await pool.query(
                     "SELECT id FROM usuarios WHERE email = ? LIMIT 1",
-                    [email]
+                    [emailNormalizado]
                 );
 
                 const usuario = rows[0];
@@ -45,7 +49,7 @@ export const recuperar = async (req, res) => {
 
         const mailOptions = {
             from: process.env.EMAIL_USER,
-            to: email,
+            to: emailNormalizado,
             subject: 'Recuperación de contraseña - Reservia',
             html: `<p>Haz clic en el siguiente enlace para recuperar tu contraseña:</p>
                    <a href="http://localhost:3000/CambiarContraseña?token=${resetToken}">Recuperar Contraseña</a>
@@ -68,8 +72,14 @@ export const reset = async (req, res) => {
         const pool = getPool();
         const { token, password } = req.body;
 
-        if (!token || !password) {
+        if (typeof token !== "string" || typeof password !== "string" || !token || !password) {
             return res.status(400).json({ mensaje: "Token y contraseña son requeridos." });
+        }
+        if (!/^[a-f\d]{64}$/i.test(token)) {
+            return res.status(400).json({ mensaje: "Token inválido o expirado." });
+        }
+        if (!/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/.test(password)) {
+            return res.status(400).json({ mensaje: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número." });
         }
 
         // Buscar usuario por token

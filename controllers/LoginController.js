@@ -8,10 +8,14 @@ export const login = async (req, res) => {
     try {
         const pool = getPool();
         const { email, password } = req.body;
+        const emailNormalizado = typeof email === "string" ? email.trim().toLowerCase() : "";
 
         // Validar que haya email y password
-        if (!email || !password) {
+        if (!emailNormalizado || typeof password !== "string" || !password) {
             return res.status(400).json({ mensaje: "Debe ingresar email y contraseña." });
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNormalizado)) {
+            return res.status(400).json({ mensaje: "El correo electrónico debe tener un formato válido." });
         }
 
         // Buscar usuario existente
@@ -20,7 +24,7 @@ export const login = async (req, res) => {
                      FROM usuarios
                      WHERE email = ?
                      LIMIT 1`,
-                    [email]
+                    [emailNormalizado]
                 );
 
                 const usuario = rows[0];

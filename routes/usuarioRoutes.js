@@ -1,6 +1,7 @@
 import express from "express";
 import { registrarUsuario, eliminarUsuario, obtenerEspecialistas, obtenerUsuarios, obtenerUsuarioPorId, actualizarUsuario } 
 from "../controllers/UsuarioController.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 
 const router = express.Router();
@@ -23,6 +24,6 @@ router.get("/:id", obtenerUsuarioPorId);
 router.put("/:id", actualizarUsuario);
 
 //Ruta para eliminar un usuario por su ID
-router.delete("/:id", eliminarUsuario);
+router.delete("/:id", authMiddleware, eliminarUsuario);
 
 export default router;
