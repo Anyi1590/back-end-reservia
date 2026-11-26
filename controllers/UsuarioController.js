@@ -80,7 +80,9 @@ export const registrarUsuario = async (req, res) => {
             return res.status(400).json({ mensaje: "La dirección debe tener al menos 5 caracteres." });
         }
         if (!isDateOnly(fechaNacimiento) || fechaNacimiento > getTodayDateOnly()) {
-            return res.status(400).json({ mensaje: "La fecha de nacimiento debe ser válida y no puede estar en el futuro." });
+            return res.status(400).json({
+                mensaje: "Esa fecha de nacimiento no se puede registrar. Ingresa una fecha real que no sea futura.",
+            });
         }
         if (!isValidPassword(password)) {
             return res.status(400).json({ mensaje: "La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un símbolo." });
